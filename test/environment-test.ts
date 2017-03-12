@@ -42,14 +42,15 @@ test('can be assigned an owner', function(assert) {
 
 test('can render a component', function(assert) {
   class HelloWorld extends Component {
+    static create() { return new this({}); }
   }
 
   let helloWorldTemplate = precompile(
-    '<h1>Hello {{@name}}!</h1>', 
+    '<h1>Hello {{@name}}!</h1>',
     { meta: { specifier: 'template:/app/components/hello-world' }});
 
   let mainTemplate = precompile(
-    '<hello-world @name={{salutation}} />', 
+    '<hello-world @name={{salutation}} />',
     { meta: { specifier: 'template:/app/main/main' }});
 
   class FakeApp implements Owner {
@@ -69,7 +70,65 @@ test('can render a component', function(assert) {
         throw new Error('Unexpected');
       }
     }
-  
+
+    lookup(specifier: string, referrer?: string): any {
+      if (specifier === 'template' && referrer === 'component:/app/components/hello-world') {
+        return helloWorldTemplate;
+      } else {
+        throw new Error('Unexpected');
+      }
+    }
+  }
+
+  let app = new FakeApp();
+  let env = Environment.create({[OWNER]: app});
+
+  let output = document.createElement('output');
+  env.begin();
+
+  let ref = new UpdatableReference({
+    salutation: 'Glimmer'
+  });
+
+  let mainLayout = templateFactory(mainTemplate).create(env);
+  mainLayout.render(ref, output, new DynamicScope());
+
+  env.commit();
+
+  assert.equal(output.innerText, 'Hello Glimmer!');
+});
+
+test('can render a component with the component helper', function(assert) {
+  class HelloWorld extends Component {
+    static create() { return new this({}); }
+  }
+
+  let helloWorldTemplate = precompile(
+    '<h1>Hello {{@name}}!</h1>',
+    { meta: { specifier: 'template:/app/components/hello-world' }});
+
+  let mainTemplate = precompile(
+    '{{component "hello-world" name=salutation}}',
+    { meta: { specifier: 'template:/app/main/main' }});
+
+  class FakeApp implements Owner {
+    identify(specifier: string, referrer?: string): string {
+      if (specifier === 'component:hello-world' &&
+          referrer === 'template:/app/main/main') {
+        return 'component:/app/components/hello-world';
+      } else {
+        throw new Error('Unexpected');
+      }
+    }
+
+    factoryFor(specifier: string, referrer?: string): Factory<any> {
+      if (specifier === 'component:/app/components/hello-world') {
+        return HelloWorld;
+      } else {
+        throw new Error('Unexpected');
+      }
+    }
+
     lookup(specifier: string, referrer?: string): any {
       if (specifier === 'template' && referrer === 'component:/app/components/hello-world') {
         return helloWorldTemplate;

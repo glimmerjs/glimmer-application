@@ -9,7 +9,8 @@ import {
 } from '@glimmer/di';
 import {
   Simple,
-  templateFactory
+  templateFactory,
+  RenderResult
 } from '@glimmer/runtime';
 import ApplicationRegistry from './application-registry';
 import DynamicScope from './dynamic-scope';
@@ -28,7 +29,7 @@ export default class Application implements Owner {
   public env: Environment;
   private _registry: Registry;
   private _container: Container;
-  private _renderResult: any; // TODO - type
+  private _renderResult: RenderResult;
 
   constructor(options: ApplicationOptions) {
     this.rootName = options.rootName;

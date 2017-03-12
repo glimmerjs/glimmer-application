@@ -1,15 +1,18 @@
 import {
+  BaselineSyntax,
+  BlockMacros,
   CompiledBlock,
+  compileLayout,
   ComponentClass,
   DOMChanges,
   DOMTreeConstruction,
   Environment as GlimmerEnvironment,
   EvaluatedArgs,
   Helper as GlimmerHelper,
+  InlineMacros,
   ModifierManager,
   PartialDefinition,
-  Simple,
-  compileLayout
+  Simple
 } from '@glimmer/runtime';
 import {
   Reference,
@@ -47,6 +50,10 @@ import Component, {
   ComponentManager
 } from '@glimmer/component';
 import Iterable from './iterable';
+import {
+  blockComponentMacro,
+  inlineComponentMacro
+ } from './dynamic-component';
 
 type KeyFor<T> = (item: Opaque, index: T) => string;
 
@@ -194,4 +201,17 @@ export default class Environment extends GlimmerEnvironment {
     let compilable = new Compiler(template);
     return compileLayout(compilable, this);
   }
+
+  macros(): { blocks: BlockMacros, inlines: InlineMacros } {
+    let macros = super.macros();
+
+    populateMacros(macros.blocks, macros.inlines);
+
+    return macros;
+  }
+}
+
+function populateMacros(blocks: BlockMacros, inlines: InlineMacros): void {
+  blocks.add('component', blockComponentMacro);
+  inlines.add('component', inlineComponentMacro);
 }
