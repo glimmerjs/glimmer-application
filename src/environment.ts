@@ -1,39 +1,27 @@
 import {
-  ComponentClass,
+  Arguments,
   DOMChanges,
   DOMTreeConstruction,
   Environment as GlimmerEnvironment,
   Helper as GlimmerHelper,
   ModifierManager,
-  PartialDefinition,
-  Simple,
-  compileLayout,
-  CompiledDynamicProgram,
   templateFactory,
   ComponentDefinition,
   Component,
-  ComponentManager,
-  Template
+  ComponentManager
 } from '@glimmer/runtime';
 import {
+  VersionedPathReference,
   Reference,
-  RevisionTag,
-  PathReference,
-  OpaqueIterator,
   OpaqueIterable,
-  AbstractIterable,
-  IterationItem,
-  VOLATILE_TAG
+  combineTagged,
+  map,
+  isConst
 } from "@glimmer/reference";
 import {
-  Dict,
   dict,
-  assign,
-  initializeGuid,
-  Opaque,
-  FIXME
+  Opaque
 } from '@glimmer/util';
-import { SerializedTemplate, SerializedTemplateWithLazyBlock } from '@glimmer/wire-format';
 import {
   getOwner,
   setOwner,
@@ -82,6 +70,20 @@ export default class Environment extends GlimmerEnvironment {
     // TODO - required for `protocolForURL` - seek alternative approach
     // e.g. see `installPlatformSpecificProtocolForURL` in Ember
     this.uselessAnchor = options.document.createElement('a') as HTMLAnchorElement;
+
+    this.helpers['if'] = function(_, args: Arguments): VersionedPathReference<Opaque> {
+      let cond = args.at<VersionedPathReference<Opaque>>(0);
+      let truthy = args.at<VersionedPathReference<Opaque>>(1);
+      let falsy = args.at<VersionedPathReference<Opaque>>(2);
+
+      if (isConst(cond)) {
+        return cond.value() ? truthy : falsy;
+      } else {
+        let mapped = map(cond, val => val ? truthy.value() : falsy.value()) as any as VersionedPathReference<Opaque>;
+        mapped.tag = combineTagged([cond, truthy, falsy]);
+        return mapped;
+      }
+    }
   }
 
   protocolForURL(url: string): string {
@@ -158,28 +160,27 @@ export default class Environment extends GlimmerEnvironment {
     return definition;
   }
 
-  hasHelper(helperName: string, blockMeta: TemplateMeta) {
-    return helperName.length === 1 && (helperName in this.helpers);
+  hasHelper(name: string, blockMeta: TemplateMeta) {
+    return (name in this.helpers);
   }
 
-  lookupHelper(helperName: string, blockMeta: TemplateMeta) {
-    let name = helperName[0];
-
+  lookupHelper(name: string, blockMeta: TemplateMeta) {
     let helper = this.helpers[name];
 
-    if (!helper) throw new Error(`Helper for ${helperName} not found.`);
+    if (!helper) throw new Error(`Helper for ${name} not found.`);
 
     return helper;
   }
 
-  hasModifier(modifierName: string, blockMeta: TemplateMeta): boolean {
-    return modifierName.length === 1 && (modifierName in this.modifiers);
+  hasModifier(name: string, blockMeta: TemplateMeta): boolean {
+    return (name in this.modifiers);
   }
 
-  lookupModifier(modifierName: string, blockMeta: TemplateMeta): ModifierManager<Opaque> {
-    let modifier = this.modifiers[modifierName];
+  lookupModifier(name: string, blockMeta: TemplateMeta): ModifierManager<Opaque> {
+    let modifier = this.modifiers[name];
 
-    if(!modifier) throw new Error(`Modifier for ${modifierName} not found.`);
+    if(!modifier) throw new Error(`Modifier for ${name} not found.`);
+
     return modifier;
   }
 
