@@ -12,11 +12,18 @@ import {
   templateFactory,
   RenderResult
 } from '@glimmer/runtime';
+import {
+  VersionedPathReference
+} from '@glimmer/reference';
+import {
+  UpdatableReference
+} from '@glimmer/object-reference';
 import ApplicationRegistry from './application-registry';
 import DynamicScope from './dynamic-scope';
 import Environment from './environment';
 
 export interface ApplicationOptions {
+  rootRef?: VersionedPathReference<object>;
   rootName: string;
   rootElement?: Simple.Element;
   resolver: Resolver;
@@ -28,6 +35,7 @@ export interface Initializer {
 }
 
 export default class Application implements Owner {
+  public rootRef: VersionedPathReference<object>;
   public rootName: string;
   public rootElement: any;
   public resolver: Resolver;
@@ -45,6 +53,7 @@ export default class Application implements Owner {
   constructor(options: ApplicationOptions) {
     this.rootName = options.rootName;
     this.rootElement = options.rootElement;
+    this.rootRef = options.rootRef;
     this.resolver = options.resolver;
   }
 
@@ -97,6 +106,10 @@ export default class Application implements Owner {
       self.document.body.appendChild(this.rootElement);
     }
 
+    if (!this.rootRef) {
+      this.rootRef = new UpdatableReference({});
+    }
+
     this.render();
   }
 
@@ -107,7 +120,7 @@ export default class Application implements Owner {
     if (!mainTemplate) { throw new Error("Could not find main template."); }
 
     let mainLayout = templateFactory(mainTemplate).create(this.env);
-    let templateIterator = mainLayout.render(null, this.rootElement, new DynamicScope());
+    let templateIterator = mainLayout.render(this.rootRef, this.rootElement, new DynamicScope());
     let result;
     do {
       result = templateIterator.next();
