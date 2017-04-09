@@ -15,6 +15,7 @@
     "dist"
   ],
   "scripts": {
+    "start": "ember serve",
     "build": "ember build",
     "preversion": "npm test",
     "prepublish": "npm run build",
