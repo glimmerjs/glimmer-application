@@ -154,6 +154,7 @@ export default class Application implements Owner {
   /** @hidden */
   rerender(): void {
     if (CURRENT_TAG.validate(this._lastRevision)) { return; }
+
     this.env.begin();
     this._renderResult.rerender();
     this._lastRevision = CURRENT_TAG.value();

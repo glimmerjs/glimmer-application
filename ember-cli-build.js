@@ -18,7 +18,8 @@ module.exports = function() {
     '@glimmer/syntax',
     '@glimmer/util',
     '@glimmer/wire-format',
-    '@glimmer/resolver'
+    '@glimmer/resolver',
+    '@glimmer/component'
   ].map(packageDist);
 
   vendorTrees.push(buildVendorPackage('simple-html-tokenizer'));
@@ -66,7 +67,8 @@ module.exports = function() {
       '@glimmer/util',
       '@glimmer/reference',
       '@glimmer/resolver',
-      '@glimmer/compiler'
+      '@glimmer/compiler',
+      '@glimmer/component'
     ]
   });
 };
