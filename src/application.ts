@@ -15,6 +15,9 @@ import {
   Component
 } from '@glimmer/runtime';
 import {
+  CURRENT_TAG
+} from '@glimmer/reference';
+import {
   UpdatableReference
 } from '@glimmer/object-reference';
 import {
@@ -57,6 +60,7 @@ export default class Application implements Owner {
   private _scheduled: boolean;
   private _initializers: Initializer[] = [];
   private _initialized = false;
+  private _lastRevision: number;
 
   constructor(options: ApplicationOptions) {
     this.rootName = options.rootName;
@@ -134,6 +138,8 @@ export default class Application implements Owner {
       result = templateIterator.next();
     } while (!result.done);
 
+    this._lastRevision = CURRENT_TAG.value();
+
     this.env.commit();
 
     this._rendered = true;
@@ -147,8 +153,10 @@ export default class Application implements Owner {
 
   /** @hidden */
   rerender(): void {
+    if (CURRENT_TAG.validate(this._lastRevision)) { return; }
     this.env.begin();
     this._renderResult.rerender();
+    this._lastRevision = CURRENT_TAG.value();
     this.env.commit();
   }
 
