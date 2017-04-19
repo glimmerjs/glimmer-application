@@ -1,40 +1,40 @@
 import {
+  Factory,
+  getOwner,
+  Owner,
+  setOwner
+} from '@glimmer/di';
+import {
+  OpaqueIterable,
+  Reference
+} from '@glimmer/reference';
+import {
+  BlockMacros,
+  Component,
+  ComponentDefinition,
+  ComponentManager,
   DOMChanges,
   DOMTreeConstruction,
   Environment as GlimmerEnvironment,
+  Helper as GlimmerHelper,
   InlineMacros,
   ModifierManager,
-  templateFactory,
-  ComponentDefinition,
-  Component,
-  ComponentManager,
-  BlockMacros,
-  Helper as GlimmerHelper
+  templateFactory
 } from '@glimmer/runtime';
-import {
-  Reference,
-  OpaqueIterable
-} from "@glimmer/reference";
 import {
   dict,
   Opaque
 } from '@glimmer/util';
-import {
-  getOwner,
-  setOwner,
-  Owner,
-  Factory
-} from '@glimmer/di';
-import Iterable from './iterable';
-import TemplateMeta from './template-meta';
-import ComponentDefinitionCreator from './component-definition-creator'
-import Application from "./application";
+import Application from './application';
+import ComponentDefinitionCreator from './component-definition-creator';
 import {
   blockComponentMacro,
   inlineComponentMacro
  } from './dynamic-component';
- import action from './helpers/action';
- import buildUserHelper from './helpers/user-helper';
+import action from './helpers/action';
+import buildUserHelper from './helpers/user-helper';
+import Iterable from './iterable';
+import TemplateMeta from './template-meta';
 
 type KeyFor<T> = (item: Opaque, index: T) => string;
 
@@ -44,7 +44,7 @@ export interface EnvironmentOptions {
 }
 
 class DefaultComponentDefinition extends ComponentDefinition<any> {
-  toJSON() {
+  public toJSON() {
     return `<default-component-definition name=${this.name}>`;
   }
 }
@@ -55,18 +55,18 @@ const DEFAULT_HELPERS = {
 };
 
 export default class Environment extends GlimmerEnvironment {
-  private helpers = dict<GlimmerHelper>();
-  private modifiers = dict<ModifierManager<Opaque>>();
-  private components = dict<ComponentDefinition<Component>>();
-  private managers = dict<ComponentManager<Component>>();
-  private uselessAnchor: HTMLAnchorElement;
-
-  static create(options: EnvironmentOptions = {}) {
+  public static create(options: EnvironmentOptions = {}) {
     options.document = options.document || self.document;
     options.appendOperations = options.appendOperations || new DOMTreeConstruction(options.document);
 
     return new Environment(options);
   }
+
+  private helpers = dict<GlimmerHelper>();
+  private modifiers = dict<ModifierManager<Opaque>>();
+  private components = dict<ComponentDefinition<Component>>();
+  private managers = dict<ComponentManager<Component>>();
+  private uselessAnchor: HTMLAnchorElement;
 
   constructor(options: EnvironmentOptions) {
     super({ appendOperations: options.appendOperations, updateOperations: new DOMChanges(options.document as HTMLDocument || document) });
@@ -78,21 +78,21 @@ export default class Environment extends GlimmerEnvironment {
     this.uselessAnchor = options.document.createElement('a') as HTMLAnchorElement;
   }
 
-  protocolForURL(url: string): string {
+  public protocolForURL(url: string): string {
     // TODO - investigate alternative approaches
     // e.g. see `installPlatformSpecificProtocolForURL` in Ember
     this.uselessAnchor.href = url;
     return this.uselessAnchor.protocol;
   }
 
-  hasPartial() {
+  public hasPartial() {
     return false;
   }
 
-  lookupPartial(): any {
+  public lookupPartial(): any {
   }
 
-  managerFor(managerId: string = DEFAULT_MANAGER): ComponentManager<Component> {
+  public managerFor(managerId: string = DEFAULT_MANAGER): ComponentManager<Component> {
     let manager: ComponentManager<Component>;
 
     manager = this.managers[managerId];
@@ -106,11 +106,11 @@ export default class Environment extends GlimmerEnvironment {
     return manager;
   }
 
-  hasComponentDefinition(name: string, meta: TemplateMeta): boolean {
+  public hasComponentDefinition(name: string, meta: TemplateMeta): boolean {
     return !!this.getComponentDefinition(name, meta);
   }
 
-  getComponentDefinition(name: string, meta: TemplateMeta): ComponentDefinition<Component> {
+  public getComponentDefinition(name: string, meta: TemplateMeta): ComponentDefinition<Component> {
     let owner: Owner = getOwner(this);
     let relSpecifier: string = `template:${name}`;
     let referrer: string = meta.specifier;
@@ -120,7 +120,7 @@ export default class Environment extends GlimmerEnvironment {
       if (owner.identify(`component:${name}`, referrer)) {
         throw new Error(`The component '${name}' is missing a template. All components must have a template. Make sure there is a template.hbs in the component directory.`);
       } else {
-        throw new Error("Could not find template for " + name);
+        throw new Error('Could not find template for ' + name);
       }
     }
 
@@ -131,7 +131,7 @@ export default class Environment extends GlimmerEnvironment {
     return this.components[specifier];
   }
 
-  registerComponent(name: string, templateSpecifier: string, meta: TemplateMeta, owner: Owner): ComponentDefinition<Component> {
+  public registerComponent(name: string, templateSpecifier: string, meta: TemplateMeta, owner: Owner): ComponentDefinition<Component> {
     let serializedTemplate = owner.lookup('template', templateSpecifier);
     let componentSpecifier = owner.identify('component', templateSpecifier);
     let componentFactory: Factory<Component> = null;
@@ -155,11 +155,11 @@ export default class Environment extends GlimmerEnvironment {
     return definition;
   }
 
-  hasHelper(name: string, meta: TemplateMeta) {
+  public hasHelper(name: string, meta: TemplateMeta) {
     return !!this.lookupHelper(name, meta);
   }
 
-  lookupHelper(name: string, meta: TemplateMeta): GlimmerHelper {
+  public lookupHelper(name: string, meta: TemplateMeta): GlimmerHelper {
     if (DEFAULT_HELPERS[name]) {
       return DEFAULT_HELPERS[name];
     }
@@ -180,7 +180,7 @@ export default class Environment extends GlimmerEnvironment {
     return this.helpers[specifier];
   }
 
-  registerHelper(specifier: string, owner: Owner): GlimmerHelper {
+  public registerHelper(specifier: string, owner: Owner): GlimmerHelper {
     let helperFunc = owner.lookup(specifier);
 
     let userHelper = buildUserHelper(helperFunc);
@@ -189,18 +189,18 @@ export default class Environment extends GlimmerEnvironment {
     return userHelper;
   }
 
-  hasModifier(modifierName: string, blockMeta: TemplateMeta): boolean {
+  public hasModifier(modifierName: string, blockMeta: TemplateMeta): boolean {
     return modifierName.length === 1 && (modifierName in this.modifiers);
   }
 
-  lookupModifier(modifierName: string, blockMeta: TemplateMeta): ModifierManager<Opaque> {
+  public lookupModifier(modifierName: string, blockMeta: TemplateMeta): ModifierManager<Opaque> {
     let modifier = this.modifiers[modifierName];
 
-    if(!modifier) throw new Error(`Modifier for ${modifierName} not found.`);
+    if (!modifier) { throw new Error(`Modifier for ${modifierName} not found.`); }
     return modifier;
   }
 
-  iterableFor(ref: Reference<Opaque>, keyPath: string): OpaqueIterable {
+  public iterableFor(ref: Reference<Opaque>, keyPath: string): OpaqueIterable {
     let keyFor: KeyFor<Opaque>;
 
     if (!keyPath) {
@@ -210,19 +210,19 @@ export default class Environment extends GlimmerEnvironment {
     switch (keyPath) {
       case '@index':
         keyFor = (_, index: number) => String(index);
-      break;
+        break;
       case '@primitive':
         keyFor = (item: Opaque) => String(item);
-      break;
+        break;
       default:
         keyFor = (item: Opaque) => item[keyPath];
-      break;
+        break;
     }
 
     return new Iterable(ref, keyFor);
   }
 
-  macros(): { blocks: BlockMacros, inlines: InlineMacros } {
+  public macros(): { blocks: BlockMacros, inlines: InlineMacros } {
     let macros = super.macros();
 
     populateMacros(macros.blocks, macros.inlines);

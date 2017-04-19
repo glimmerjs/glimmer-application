@@ -1,4 +1,4 @@
-import { getOwner, setOwner, Owner } from '@glimmer/di';
+import { getOwner, Owner, setOwner } from '@glimmer/di';
 import { DOMTreeConstruction } from '@glimmer/runtime';
 
 import Environment, { EnvironmentOptions } from '../src/environment';
@@ -24,11 +24,11 @@ test('can be instantiated with create', function(assert) {
 
 test('can be assigned an owner', function(assert) {
   class FakeApp implements Owner {
-    identify(specifier: string, referrer?: string) { return ''; }
-    factoryFor(specifier: string, referrer?: string) { return null; }
-    lookup(specifier: string, referrer?: string) { return null; }
+    public dentify(specifier: string, referrer?: string) { return ''; }
+    public factoryFor(specifier: string, referrer?: string) { return null; }
+    public lookup(specifier: string, referrer?: string) { return null; }
   }
-  let app = new FakeApp;
+  let app = new FakeApp();
 
   let options: EnvironmentOptions = {};
   setOwner(options, app);
@@ -39,7 +39,7 @@ test('can be assigned an owner', function(assert) {
 
 test('can render a component', function(assert) {
   class MainComponent extends TestComponent {
-    salutation = 'Glimmer';
+    public salutation = 'Glimmer';
   }
 
   let app = buildApp()
@@ -53,7 +53,7 @@ test('can render a component', function(assert) {
 
 test('can render a component with the component helper', function(assert) {
   class MainComponent extends TestComponent {
-    salutation = 'Glimmer';
+    public salutation = 'Glimmer';
   }
 
   let app = buildApp()
@@ -71,7 +71,7 @@ test('can render a component with the component helper', function(assert) {
 
 test('components without a template raise an error', function(assert) {
   class HelloWorldComponent extends TestComponent {
-    debugName: 'hello-world'
+    public debugName: 'hello-world';
   }
 
   let app = buildApp()
@@ -88,7 +88,7 @@ test('can render a custom helper', function(assert) {
   }
 
   let app = buildApp()
-    .helper('greeting', () => "Hello Glimmer!")
+    .helper('greeting', () => 'Hello Glimmer!')
     .template('main', '<div>{{greeting}}</div>')
     .component('main', MainComponent)
     .boot();
@@ -102,8 +102,8 @@ test('can render a custom helper', function(assert) {
 
 test('can render a custom helper that takes args', function(assert) {
   class MainComponent extends TestComponent {
-    firstName = 'Tom'
-    lastName = 'Dale'
+    public firstName = 'Tom';
+    public lastName = 'Dale';
   }
 
   let app = buildApp()
@@ -118,4 +118,3 @@ test('can render a custom helper that takes args', function(assert) {
 
   assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
 });
-

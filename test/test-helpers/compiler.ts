@@ -1,10 +1,10 @@
 import {
   precompile as glimmerPrecompile,
   PrecompileOptions
-} from "@glimmer/compiler";
-import { 
+} from '@glimmer/compiler';
+import {
   SerializedTemplateWithLazyBlock
-} from "@glimmer/wire-format";
+} from '@glimmer/wire-format';
 import TemplateMeta from '../../src/template-meta';
 
 export function precompile(template: string, options: PrecompileOptions<TemplateMeta>): SerializedTemplateWithLazyBlock<TemplateMeta> {

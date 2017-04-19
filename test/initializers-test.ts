@@ -6,14 +6,13 @@ const { module, test } = QUnit;
 module('Application InstanceInitializers');
 
 class Component {
-  static create() {
+  public static create() {
     return new Component();
   }
 }
 
 test('instance initializers run at initialization', function(assert) {
   let app = new Application({ rootName: 'app', resolver: new BlankResolver() });
-
 
   app.registerInitializer({
     initialize(app) {

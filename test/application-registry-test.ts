@@ -1,5 +1,5 @@
+import { getOwner, Registry, Resolver } from '@glimmer/di';
 import ApplicationRegistry from '../src/application-registry';
-import { Registry, Resolver, getOwner } from '@glimmer/di';
 import { BlankResolver } from './test-helpers/resolvers';
 
 const { module, test } = QUnit;
@@ -8,11 +8,11 @@ module('ApplicationRegistry');
 
 test('#register - registers a factory', function(assert) {
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let registry = new Registry();
-  let appRegistry = new ApplicationRegistry(registry, new BlankResolver);
+  let appRegistry = new ApplicationRegistry(registry, new BlankResolver());
 
   assert.strictEqual(appRegistry.registration('foo:/app/foos/bar'), undefined, 'factory has not yet been registered');
   appRegistry.register('foo:/app/foos/bar', Foo);
@@ -21,11 +21,11 @@ test('#register - registers a factory', function(assert) {
 
 test('#register - can register options together with a factory', function(assert) {
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let registry = new Registry();
-  let appRegistry = new ApplicationRegistry(registry, new BlankResolver);
+  let appRegistry = new ApplicationRegistry(registry, new BlankResolver());
 
   assert.strictEqual(appRegistry.registration('foo:/app/foos/bar'), undefined, 'factory has not yet been registered');
   appRegistry.register('foo:/app/foos/bar', Foo, { instantiate: false });
@@ -35,11 +35,11 @@ test('#register - can register options together with a factory', function(assert
 
 test('#registration - returns a factory has been registered', function(assert) {
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let registry = new Registry();
-  let appRegistry = new ApplicationRegistry(registry, new BlankResolver);
+  let appRegistry = new ApplicationRegistry(registry, new BlankResolver());
 
   assert.strictEqual(appRegistry.registration('foo:/app/foos/bar'), undefined, 'factory has not yet been registered');
   appRegistry.register('foo:/app/foos/bar', Foo);
@@ -48,11 +48,11 @@ test('#registration - returns a factory has been registered', function(assert) {
 
 test('#unregister - unregisters a factory', function(assert) {
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let registry = new Registry();
-  let appRegistry = new ApplicationRegistry(registry, new BlankResolver);
+  let appRegistry = new ApplicationRegistry(registry, new BlankResolver());
 
   appRegistry.register('foo:/app/foos/bar', Foo);
   assert.strictEqual(appRegistry.registration('foo:/app/foos/bar'), Foo, 'factory has been registered');
@@ -62,11 +62,11 @@ test('#unregister - unregisters a factory', function(assert) {
 
 test('#registerOption, #registeredOptions, #registeredOption, #unregisterOption', function(assert) {
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let registry = new Registry();
-  let appRegistry = new ApplicationRegistry(registry, new BlankResolver);
+  let appRegistry = new ApplicationRegistry(registry, new BlankResolver());
 
   appRegistry.register('foo:/app/foos/bar', Foo);
   assert.strictEqual(appRegistry.registeredOptions('foo:/app/foos/bar'), undefined);
@@ -83,11 +83,11 @@ test('#registerOption, #registeredOptions, #registeredOption, #unregisterOption'
 
 test('Options registered by full name supercede those registered by type', function(assert) {
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let registry = new Registry();
-  let appRegistry = new ApplicationRegistry(registry, new BlankResolver);
+  let appRegistry = new ApplicationRegistry(registry, new BlankResolver());
 
   appRegistry.register('foo:/app/foos/bar', Foo);
 

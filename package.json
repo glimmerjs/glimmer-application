@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "ember build",
+    "lint": "tslint -p .",
     "preversion": "npm test",
     "prepublish": "npm run build",
     "postpublish": "git push origin master --tags",
@@ -27,7 +28,8 @@
     "@glimmer/reference": "^0.23.0-alpha.6",
     "@glimmer/resolver": "^0.3.0",
     "@glimmer/runtime": "^0.23.0-alpha.6",
-    "@glimmer/util": "^0.23.0-alpha.6"
+    "@glimmer/util": "^0.23.0-alpha.6",
+    "tslint": "^5.1.0"
   },
   "devDependencies": {
     "@glimmer/build": "^0.6.2",

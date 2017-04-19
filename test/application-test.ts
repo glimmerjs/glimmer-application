@@ -6,6 +6,6 @@ const { module, test } = QUnit;
 module('Application');
 
 test('can be instantiated', function(assert) {
-  let app = new Application({ rootName: 'app', resolver: new BlankResolver });
+  let app = new Application({ rootName: 'app', resolver: new BlankResolver() });
   assert.ok(app, 'app exists');
 });

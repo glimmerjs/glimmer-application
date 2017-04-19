@@ -1,5 +1,5 @@
-import { ConstReference, Reference } from "@glimmer/reference";
-import { VM, Arguments } from "@glimmer/runtime";
+import { ConstReference, Reference } from '@glimmer/reference';
+import { Arguments, VM } from '@glimmer/runtime';
 
 export default function buildAction(vm: VM, _args: Arguments) {
   let componentRef = vm.getSelf();
@@ -37,11 +37,11 @@ export function debugInfoForReference(reference: any): string {
   if (reference == null) { return message; }
 
   if ('parent' in reference && 'property' in reference) {
-    parent = reference['parent'].value();
-    property = reference['property'];
+    parent = reference.parent.value();
+    property = reference.property;
   } else if ('_parentValue' in reference && '_propertyKey' in reference) {
-    parent = reference['_parentValue'];
-    property = reference['_propertyKey'];
+    parent = reference._parentValue;
+    property = reference._propertyKey;
   }
 
   if (property !== undefined) {
@@ -58,8 +58,8 @@ function debugName(obj: any) {
   } else if (objType === 'number' || objType === 'boolean') {
     return obj.toString();
   } else {
-    if (obj['debugName']) {
-      return obj['debugName'];
+    if (obj.debugName) {
+      return obj.debugName;
     }
     try {
       return JSON.stringify(obj);

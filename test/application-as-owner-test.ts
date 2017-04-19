@@ -1,5 +1,5 @@
+import { getOwner, isSpecifierStringAbsolute, Resolver } from '@glimmer/di';
 import Application from '../src/application';
-import { Resolver, getOwner, isSpecifierStringAbsolute } from '@glimmer/di';
 import { BlankResolver } from './test-helpers/resolvers';
 
 const { module, test } = QUnit;
@@ -10,14 +10,14 @@ test('#identify - uses a resolver to convert a relative specifier to an absolute
   assert.expect(2);
 
   class FakeResolver implements Resolver {
-    identify(specifier: string, referrer?: string) {
+    public identify(specifier: string, referrer?: string) {
       if (isSpecifierStringAbsolute(specifier)) {
         return specifier;
       }
       assert.equal(specifier, 'component:date-picker', 'FakeResolver#identify was invoked');
       return 'component:/app/components/date-picker';
     }
-    retrieve(specifier: string): any {}
+    public retrieve(specifier: string): any {}
   }
 
   let resolver = new FakeResolver();
@@ -28,7 +28,7 @@ test('#identify - uses a resolver to convert a relative specifier to an absolute
 
 test('#factoryFor - returns a registered factory', function(assert) {
   class DatePicker {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   let app = new Application({ rootName: 'app', resolver: new BlankResolver() });
@@ -49,18 +49,18 @@ test('#factoryFor - will use a resolver to locate a factory', function(assert) {
   assert.expect(3);
 
   class DatePicker {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   class FakeResolver implements Resolver {
-    identify(specifier: string, referrer?: string) {
+    public identify(specifier: string, referrer?: string) {
       if (isSpecifierStringAbsolute(specifier)) {
         return specifier;
       }
       assert.equal(specifier, 'component:date-picker', 'FakeResolver#identify was invoked');
       return 'component:/app/components/date-picker';
     }
-    retrieve(specifier: string): any {
+    public retrieve(specifier: string): any {
       assert.equal(specifier, 'component:/app/components/date-picker', 'FakeResolver#identify was invoked');
       return DatePicker;
     }
@@ -79,22 +79,22 @@ test('#factoryFor - will use a resolver to locate a factory, even if one is regi
   assert.expect(3);
 
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   class FooBar {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   class FakeResolver implements Resolver {
-    identify(specifier: string, referrer: string) {
+    public identify(specifier: string, referrer: string) {
       if (isSpecifierStringAbsolute(specifier)) {
         return specifier;
       }
       assert.equal(specifier, 'foo:bar', 'FakeResolver#identify was invoked');
       return 'foo:/app/foos/bar';
     }
-    retrieve(id: string): any {
+    public retrieve(id: string): any {
       assert.equal(id, 'foo:/app/foos/bar', 'FakeResolver#identify was invoked');
       return FooBar;
     }
@@ -121,7 +121,7 @@ test('#lookup - returns an instance created by the factory', function(assert) {
   let instance = { foo: 'bar' };
 
   class FooBar {
-    static create(injections) {
+    public static create(injections) {
       assert.ok(true, 'Factory#create invoked');
       assert.strictEqual(getOwner(injections), app, 'owner is included in injections');
       return instance;
@@ -147,7 +147,7 @@ test('#lookup - caches looked up instances by default', function(assert) {
   let createCounter = 0;
 
   class FooBar {
-    static create(): FooBar {
+    public static create(): FooBar {
       createCounter++;
       return new FooBar();
     }
@@ -160,7 +160,7 @@ test('#lookup - caches looked up instances by default', function(assert) {
     }
   });
 
-  app.initialize();  
+  app.initialize();
 
   let foo1 = app.lookup('foo:/app/foos/bar');
   assert.equal(createCounter, 1);
@@ -176,7 +176,7 @@ test('#lookup - will not cache lookups specified as non-singletons', function(as
   let createCounter = 0;
 
   class FooBar {
-    static create(): FooBar {
+    public static create(): FooBar {
       createCounter++;
       return new FooBar();
     }
@@ -225,18 +225,18 @@ test('#lookup - uses the resolver to locate a registration', function(assert) {
   assert.expect(3);
 
   class Foo {
-    static create() { return { foo: 'bar' }; }
+    public static create() { return { foo: 'bar' }; }
   }
 
   class FakeResolver implements Resolver {
-    identify(specifier: string, referrer?: string): string {
+    public identify(specifier: string, referrer?: string): string {
       if (isSpecifierStringAbsolute(specifier)) {
         return specifier;
       }
       assert.equal(specifier, 'foo:bar', 'FakeResolver#identify was invoked');
       return 'foo:/app/foos/bar';
     }
-    retrieve(specifier: string): any {
+    public retrieve(specifier: string): any {
       assert.equal(specifier, 'foo:/app/foos/bar', 'FakeResolver#identify was invoked');
       return Foo;
     }
@@ -258,16 +258,16 @@ test('#lookup - injects references registered by name', function(assert) {
   let router = { name: 'router' };
 
   class FooBar {
-    static create(injections) {
+    public static create(injections) {
       assert.ok(true, 'FooBarFactory#create invoked');
-      assert.strictEqual(injections['router'], router, 'expected injections passed to factory');
-      instance['router'] = injections['router'];
+      assert.strictEqual(injections.router, router, 'expected injections passed to factory');
+      instance.router = injections.router;
       return instance;
     }
   }
 
   class Router {
-    static create() {
+    public static create() {
       assert.ok(true, 'RouterFactory#create invoked');
       return router;
     }
@@ -286,7 +286,7 @@ test('#lookup - injects references registered by name', function(assert) {
   app.initialize();
 
   assert.strictEqual(app.lookup('foo:/app/foos/bar'), instance, 'instance returned');
-  assert.strictEqual(instance['router'], router, 'injection has been applied to instance');
+  assert.strictEqual(instance.router, router, 'injection has been applied to instance');
 });
 
 test('#lookup - injects references registered by type', function(assert) {
@@ -296,16 +296,16 @@ test('#lookup - injects references registered by type', function(assert) {
   let router = { name: 'router' };
 
   class FooBar {
-    static create(injections) {
+    public static create(injections) {
       assert.ok(true, 'FooBarFactory#create invoked');
-      assert.strictEqual(injections['router'], router, 'expected injections passed to factory');
-      instance['router'] = injections['router'];
+      assert.strictEqual(injections.router, router, 'expected injections passed to factory');
+      instance.router = injections.router;
       return instance;
     }
   }
 
   class Router {
-    static create() {
+    public static create() {
       assert.ok(true, 'RouterFactory#create invoked');
       return router;
     }
@@ -324,5 +324,5 @@ test('#lookup - injects references registered by type', function(assert) {
   app.initialize();
 
   assert.strictEqual(app.lookup('foo:/app/foos/bar'), instance, 'instance returned');
-  assert.strictEqual(instance['router'], router, 'injection has been applied to instance');
+  assert.strictEqual(instance.router, router, 'injection has been applied to instance');
 });

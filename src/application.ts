@@ -8,14 +8,14 @@ import {
   setOwner,
 } from '@glimmer/di';
 import {
-  Simple,
-  templateFactory,
-  ComponentDefinition,
-  Component
-} from '@glimmer/runtime';
-import {
   UpdatableReference
 } from '@glimmer/object-reference';
+import {
+  Component,
+  ComponentDefinition,
+  Simple,
+  templateFactory
+} from '@glimmer/runtime';
 import {
   Option
 } from '@glimmer/util';
@@ -37,10 +37,10 @@ export interface Initializer {
 }
 
 export interface AppRoot {
-  id: number,
-  component: string | ComponentDefinition<Component>,
-  parent: Simple.Node,
-  nextSibling: Option<Simple.Node>
+  id: number;
+  component: string | ComponentDefinition<Component>;
+  parent: Simple.Node;
+  nextSibling: Option<Simple.Node>;
 }
 
 export default class Application implements Owner {
@@ -62,18 +62,18 @@ export default class Application implements Owner {
   constructor(options: ApplicationOptions) {
     this.rootName = options.rootName;
     this.resolver = options.resolver;
-    this._renderPromise = new Promise<void>(resolve => {
+    this._renderPromise = new Promise<void>((resolve) => {
       this._afterRender = resolve;
     });
   }
 
   /** @hidden */
-  registerInitializer(initializer: Initializer): void {
+  public registerInitializer(initializer: Initializer): void {
     this._initializers.push(initializer);
   }
 
   /** @hidden */
-  initRegistry(): void {
+  public initRegistry(): void {
     let registry = this._registry = new Registry();
 
     // Create ApplicationRegistry as a proxy to the underlying registry
@@ -89,15 +89,15 @@ export default class Application implements Owner {
     registry.registerInjection('component-manager', 'env', `environment:/${this.rootName}/main/main`);
 
     let initializers = this._initializers;
-    for (let i = 0; i < initializers.length; i++) {
-      initializers[i].initialize(appRegistry);
+    for (let initializer of initializers) {
+      initializer.initialize(appRegistry);
     }
 
     this._initialized = true;
   }
 
   /** @hidden */
-  initContainer(): void {
+  public initContainer(): void {
     this._container = new Container(this._registry, this.resolver);
 
     // Inject `this` (the app) as the "owner" of every object instantiated
@@ -106,17 +106,17 @@ export default class Application implements Owner {
       let hash = {};
       setOwner(hash, this);
       return hash;
-    }
+    };
   }
 
   /** @hidden */
-  initialize(): void {
+  public initialize(): void {
     this.initRegistry();
     this.initContainer();
   }
 
   /** @hidden */
-  boot(): void {
+  public boot(): void {
     this.initialize();
 
     this.env = this.lookup(`environment:/${this.rootName}/main/main`);
@@ -125,7 +125,7 @@ export default class Application implements Owner {
   }
 
   /** @hidden */
-  render(): void {
+  public render(): void {
     this.env.begin();
 
     let mainLayout = templateFactory(mainTemplate).create(this.env);
@@ -152,7 +152,7 @@ export default class Application implements Owner {
     this._didRender();
   }
 
-  _didRender(): void {
+  public _didRender(): void {
     let { _afterRender } = this;
 
     this._afterRender = NOOP;
@@ -162,7 +162,7 @@ export default class Application implements Owner {
     _afterRender();
   }
 
-  renderComponent(
+  public renderComponent(
     component: string | ComponentDefinition<Component>,
     parent: Simple.Node,
     nextSibling: Option<Simple.Node> = null
@@ -171,11 +171,11 @@ export default class Application implements Owner {
     return this.scheduleRerender();
   }
 
-  scheduleRerender(): Promise<void> {
+  public scheduleRerender(): Promise<void> {
     let { _renderPromise } = this;
 
     if (_renderPromise === null) {
-      _renderPromise = this._renderPromise = new Promise<void>(resolve => {
+      _renderPromise = this._renderPromise = new Promise<void>((resolve) => {
         this._afterRender = resolve;
       });
 
@@ -185,8 +185,8 @@ export default class Application implements Owner {
     return _renderPromise;
   }
 
-  _scheduleRerender(): void {
-    if (this._scheduled || !this._rendered) return;
+  public _scheduleRerender(): void {
+    if (this._scheduled || !this._rendered) { return; }
 
     this._scheduled = true;
     requestAnimationFrame(() => {
@@ -200,17 +200,17 @@ export default class Application implements Owner {
    *
    * @hidden
    */
-  identify(specifier: string, referrer?: string): string {
+  public identify(specifier: string, referrer?: string): string {
     return this.resolver.identify(specifier, referrer);
   }
 
   /** @hidden */
-  factoryFor(specifier: string, referrer?: string): Factory<any> {
+  public factoryFor(specifier: string, referrer?: string): Factory<any> {
     return this._container.factoryFor(this.identify(specifier, referrer));
   }
 
   /** @hidden */
-  lookup(specifier: string, referrer?: string): any {
+  public lookup(specifier: string, referrer?: string): any {
     return this._container.lookup(this.identify(specifier, referrer));
   }
 }
