@@ -3,16 +3,16 @@ import {
 } from '@glimmer/util';
 
 import {
-  Reference,
-  OpaqueIterator,
   AbstractIterable,
   IterationItem,
+  OpaqueIterator,
+  Reference,
   Tag
-} from "@glimmer/reference";
+} from '@glimmer/reference';
 
 import {
   UpdatableReference
-} from "@glimmer/object-reference";
+} from '@glimmer/object-reference';
 
 export type KeyFor<T> = (item: Opaque, index: T) => string;
 
@@ -26,14 +26,14 @@ class ArrayIterator implements OpaqueIterator {
     this.keyFor = keyFor;
   }
 
-  isEmpty(): boolean {
+  public isEmpty(): boolean {
     return this.array.length === 0;
   }
 
-  next(): IterationItem<Opaque, number> {
+  public next(): IterationItem<Opaque, number> {
     let { position, array, keyFor } = this;
 
-    if (position >= array.length) return null;
+    if (position >= array.length) { return null; }
 
     let value = array[position];
     let key = keyFor(value, position);
@@ -57,14 +57,14 @@ class ObjectKeysIterator implements OpaqueIterator {
     this.keyFor = keyFor;
   }
 
-  isEmpty(): boolean {
+  public isEmpty(): boolean {
     return this.keys.length === 0;
   }
 
-  next(): IterationItem<Opaque, string> {
+  public next(): IterationItem<Opaque, string> {
     let { position, keys, values, keyFor } = this;
 
-    if (position >= keys.length) return null;
+    if (position >= keys.length) { return null; }
 
     let value = values[position];
     let memo = keys[position];
@@ -77,11 +77,11 @@ class ObjectKeysIterator implements OpaqueIterator {
 }
 
 class EmptyIterator implements OpaqueIterator {
-  isEmpty(): boolean {
+  public isEmpty(): boolean {
     return true;
   }
 
-  next(): IterationItem<Opaque, Opaque> {
+  public next(): IterationItem<Opaque, Opaque> {
     throw new Error(`Cannot call next() on an empty iterator`);
   }
 }
@@ -99,7 +99,7 @@ export default class Iterable implements AbstractIterable<Opaque, Opaque, Iterat
     this.keyFor = keyFor;
   }
 
-  iterate(): OpaqueIterator {
+  public iterate(): OpaqueIterator {
     let { ref, keyFor } = this;
 
     let iterable = ref.value() as any;
@@ -116,25 +116,25 @@ export default class Iterable implements AbstractIterable<Opaque, Opaque, Iterat
       return array.length > 0 ? new ArrayIterator(array, keyFor) : EMPTY_ITERATOR;
     } else if (typeof iterable === 'object') {
        let keys = Object.keys(iterable);
-       return keys.length > 0 ? new ObjectKeysIterator(keys, keys.map(key => iterable[key]), keyFor) : EMPTY_ITERATOR;
+       return keys.length > 0 ? new ObjectKeysIterator(keys, keys.map((key) => iterable[key]), keyFor) : EMPTY_ITERATOR;
      } else {
       throw new Error(`Don't know how to {{#each ${iterable}}}`);
     }
   }
 
-  valueReferenceFor(item: IterationItem<Opaque, Opaque>): UpdatableReference<Opaque> {
+  public valueReferenceFor(item: IterationItem<Opaque, Opaque>): UpdatableReference<Opaque> {
     return new UpdatableReference(item.value);
   }
 
-  updateValueReference(reference: UpdatableReference<Opaque>, item: IterationItem<Opaque, Opaque>) {
+  public updateValueReference(reference: UpdatableReference<Opaque>, item: IterationItem<Opaque, Opaque>) {
     reference.update(item.value);
   }
 
-  memoReferenceFor(item: IterationItem<Opaque, Opaque>): UpdatableReference<Opaque> {
+  public memoReferenceFor(item: IterationItem<Opaque, Opaque>): UpdatableReference<Opaque> {
     return new UpdatableReference(item.memo);
   }
 
-  updateMemoReference(reference: UpdatableReference<Opaque>, item: IterationItem<Opaque, Opaque>) {
+  public updateMemoReference(reference: UpdatableReference<Opaque>, item: IterationItem<Opaque, Opaque>) {
     reference.update(item.memo);
   }
 }

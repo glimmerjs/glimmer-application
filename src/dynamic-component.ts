@@ -1,22 +1,22 @@
 import {
-  RevisionTag,
   PathReference,
+  RevisionTag,
   TagWrapper
 } from '@glimmer/reference';
 import {
-  ComponentDefinition,
-  Environment as GlimmerEnvironment,
-  VM,
   Arguments,
   ComponentArgs,
-  UNDEFINED_REFERENCE
+  ComponentDefinition,
+  Environment as GlimmerEnvironment,
+  UNDEFINED_REFERENCE,
+  VM
 } from '@glimmer/runtime';
 import {
   Opaque,
   Option
 } from '@glimmer/util';
 import * as WireFormat from '@glimmer/wire-format';
-import { TemplateMeta } from "./index";
+import { TemplateMeta } from './index';
 
 export function blockComponentMacro(params, hash, template, inverse, builder) {
   let definitionArgs: ComponentArgs = [params.slice(0, 1), null, null, null];
@@ -50,7 +50,7 @@ class DynamicComponentReference implements PathReference<ComponentDefinition<Opa
     this.tag = nameRef.tag;
   }
 
-  value(): ComponentDefinition<Opaque> {
+  public value(): ComponentDefinition<Opaque> {
     let { env, nameRef } = this;
 
     let nameOrDef = nameRef.value();
@@ -62,13 +62,13 @@ class DynamicComponentReference implements PathReference<ComponentDefinition<Opa
     return null;
   }
 
-  get() {
+  public get() {
     return UNDEFINED_REFERENCE;
   }
 }
 
 function hashToArgs(hash: Option<WireFormat.Core.Hash>): Option<WireFormat.Core.Hash> {
-  if (hash === null) return null;
-  let names = hash[0].map(key => `@${key}`);
+  if (hash === null) { return null; }
+  let names = hash[0].map((key) => `@${key}`);
   return [names, hash[1]];
 }

@@ -1,6 +1,6 @@
 import {
   Reference
-} from "@glimmer/reference";
+} from '@glimmer/reference';
 import Iterable, {
   KeyFor
 } from '../src/iterable';

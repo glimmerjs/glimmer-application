@@ -1,18 +1,18 @@
 import {
-  assign,
-  Opaque
-} from '@glimmer/util';
+  PathReference
+} from '@glimmer/reference';
 import {
   DynamicScope as GlimmerDynamicScope
 } from '@glimmer/runtime';
 import {
-  PathReference
-} from '@glimmer/reference';
+  assign,
+  Opaque
+} from '@glimmer/util';
 
 export default class DynamicScope implements GlimmerDynamicScope {
   private bucket;
 
-  constructor(bucket=null) {
+  constructor(bucket= null) {
     if (bucket) {
       this.bucket = assign({}, bucket);
     } else {
@@ -20,15 +20,15 @@ export default class DynamicScope implements GlimmerDynamicScope {
     }
   }
 
-  get(key: string): PathReference<Opaque> {
+  public get(key: string): PathReference<Opaque> {
     return this.bucket[key];
   }
 
-  set(key: string, reference: PathReference<Opaque>) {
+  public set(key: string, reference: PathReference<Opaque>) {
     return this.bucket[key] = reference;
   }
 
-  child(): DynamicScope {
+  public child(): DynamicScope {
     return new DynamicScope(this.bucket);
   }
 }

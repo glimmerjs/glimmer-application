@@ -1,5 +1,5 @@
-import { Template, Component, ComponentDefinition } from '@glimmer/runtime';
 import { Factory } from '@glimmer/di';
+import { Component, ComponentDefinition, Template } from '@glimmer/runtime';
 import TemplateMeta from './template-meta';
 
 interface ComponentDefinitionCreator {

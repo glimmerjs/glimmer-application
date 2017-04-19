@@ -1,0 +1,23 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "quotemark": [true, "single"],
+    "trailing-comma": [false],
+    "object-literal-sort-keys": false,
+    "interface-name": [true, "never-prefix"],
+    "variable-name": [true, "allow-leading-underscore", "allow-pascal-case"],
+    "max-classes-per-file": [false],
+    "max-line-length": [false],
+    "ban-types": [false],
+    "no-empty": false,
+    "only-arrow-functions": [false],
+    "no-shadowed-variable": false,
+    "prefer-const": false,
+    "object-literal-key-quotes": [true, "as-needed"]
+  },
+  "rulesDirectory": []
+}

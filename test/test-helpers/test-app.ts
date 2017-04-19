@@ -1,8 +1,8 @@
-import Application from '../../src/application';
 import Resolver, { BasicModuleRegistry } from '@glimmer/resolver';
+import Application from '../../src/application';
 
-import { TestComponent, TestComponentManager } from './components';
 import { precompile } from './compiler';
+import { TestComponent, TestComponentManager } from './components';
 
 export interface ComponentFactory {
   create(injections: object): TestComponent;
@@ -13,7 +13,7 @@ export default function buildApp(appName: string = 'test-app') {
 }
 
 export class TestApplication extends Application {
-  rootElement: HTMLElement;
+  public rootElement: HTMLElement;
 }
 
 let moduleConfiguration = {
@@ -45,8 +45,8 @@ let moduleConfiguration = {
 };
 
 export class AppBuilder {
-  rootName: string;
-  modules: any = {}
+  public rootName: string;
+  public modules: any = {};
 
   constructor(name: string) {
     this.rootName = name;
@@ -54,25 +54,25 @@ export class AppBuilder {
     this.template('main', '<div />');
   }
 
-  template(name: string, template: string) {
+  public template(name: string, template: string) {
     let specifier = `template:/${this.rootName}/components/${name}`;
     this.modules[specifier] = precompile(template, { meta: { specifier, '<template-meta>': true }});
     return this;
   }
 
-  component(name: string, componentFactory: ComponentFactory) {
+  public component(name: string, componentFactory: ComponentFactory) {
     let specifier = `component:/${this.rootName}/components/${name}`;
     this.modules[specifier] = componentFactory;
     return this;
   }
 
-  helper(name: string, helperFunc) {
+  public helper(name: string, helperFunc) {
     let specifier = `helper:/${this.rootName}/components/${name}`;
     this.modules[specifier] = helperFunc;
     return this;
   }
 
-  boot() {
+  public boot() {
     let resolverConfiguration = {
       app: { name: 'test-app', rootName: 'test-app' },
       types: moduleConfiguration.types,

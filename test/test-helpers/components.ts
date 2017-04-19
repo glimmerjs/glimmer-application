@@ -1,23 +1,23 @@
-import { ComponentManager, ComponentDefinition, Arguments, CompiledDynamicProgram, Template, Bounds, DynamicScope } from '@glimmer/runtime';
 import { Factory } from '@glimmer/di';
-import ComponentDefinitionCreator from '../../src/component-definition-creator';
-import Environment from "../../src/environment";
-import TemplateMeta from '../../src/template-meta';
 import { UpdatableReference } from '@glimmer/object-reference';
+import { Arguments, Bounds, CompiledDynamicProgram, ComponentDefinition, ComponentManager, DynamicScope, Template } from '@glimmer/runtime';
+import ComponentDefinitionCreator from '../../src/component-definition-creator';
+import Environment from '../../src/environment';
+import TemplateMeta from '../../src/template-meta';
 
 export class TestComponent {
-  element: Element;
-
-  static create(injections: object) {
+  public static create(injections: object) {
     let component = new this();
     Object.assign(component, injections);
     return component;
   }
+
+  public element: Element;
 }
 
 export class TestComponentDefinition extends ComponentDefinition<TestComponent> {
-  componentFactory: Factory<TestComponent>;
-  template: Template<TemplateMeta>;
+  public componentFactory: Factory<TestComponent>;
+  public template: Template<TemplateMeta>;
 
   constructor(name: string, manager: TestComponentManager, template: Template<TemplateMeta>, componentFactory: Factory<TestComponent>) {
     super(name, manager, null);
@@ -26,69 +26,69 @@ export class TestComponentDefinition extends ComponentDefinition<TestComponent> 
     this.componentFactory = componentFactory;
   }
 
-  toJSON() {
+  public toJSON() {
     return `<test-component-definition name=${this.name}>`;
   }
 }
 
 export class TestComponentManager implements ComponentManager<TestComponent>, ComponentDefinitionCreator {
+  public static create(injections: object): TestComponentManager {
+    return new TestComponentManager(injections);
+  }
+
   private env: Environment;
 
   constructor(injections: object) {
     Object.assign(this, injections);
   }
 
-  static create(injections: object): TestComponentManager {
-    return new TestComponentManager(injections);
-  }
-
-  create(environment: Environment, definition: TestComponentDefinition, args: Arguments): TestComponent {
+  public create(environment: Environment, definition: TestComponentDefinition, args: Arguments): TestComponent {
     if (!definition.componentFactory) { return; }
     return definition.componentFactory.create();
   }
 
-  createComponentDefinition(name: string, template: Template<TemplateMeta>, componentFactory?: Factory<TestComponent>): ComponentDefinition<TestComponent> {
+  public createComponentDefinition(name: string, template: Template<TemplateMeta>, componentFactory?: Factory<TestComponent>): ComponentDefinition<TestComponent> {
     return new TestComponentDefinition(name, this, template, componentFactory);
   }
 
-  prepareArgs(definition: ComponentDefinition<TestComponent>, args: Arguments): null {
+  public prepareArgs(definition: ComponentDefinition<TestComponent>, args: Arguments): null {
     return null;
   }
 
-  layoutFor(definition: TestComponentDefinition, component: TestComponent, env: Environment): CompiledDynamicProgram {
+  public layoutFor(definition: TestComponentDefinition, component: TestComponent, env: Environment): CompiledDynamicProgram {
     let template = definition.template;
     let compiledLayout = template.asLayout().compileDynamic(this.env);
 
     return compiledLayout;
   }
 
-  getSelf(component: TestComponent) {
+  public getSelf(component: TestComponent) {
     return component ? new UpdatableReference(component) : null;
   }
 
-  didCreateElement(component: TestComponent, element: Element) {
+  public didCreateElement(component: TestComponent, element: Element) {
     if (!component) { return; }
     component.element = element;
   }
 
-  didRenderLayout(component: TestComponent, bounds: Bounds) {
+  public didRenderLayout(component: TestComponent, bounds: Bounds) {
   }
 
-  didCreate(component: TestComponent) {
+  public didCreate(component: TestComponent) {
   }
 
-  getTag() {
+  public getTag() {
     return null;
   }
 
-  update(component: TestComponent, scope: DynamicScope) {
+  public update(component: TestComponent, scope: DynamicScope) {
   }
 
-  didUpdateLayout() {}
+  public didUpdateLayout() {}
 
-  didUpdate() {}
+  public didUpdate() {}
 
-  getDestructor() {
+  public getDestructor() {
     return null;
   }
 }

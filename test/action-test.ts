@@ -1,6 +1,6 @@
+import { debugInfoForReference } from '../src/helpers/action';
 import { TestComponent } from './test-helpers/components';
 import buildApp from './test-helpers/test-app';
-import { debugInfoForReference } from '../src/helpers/action';
 
 const { module, test } = QUnit;
 
@@ -11,17 +11,19 @@ test('can curry arguments to actions', function(assert) {
 
   let fakeEvent: any = {};
   let helloWorldComponent: HelloWorld;
-  let passedMsg1, passedMsg2, passedEvent;
+  let passedMsg1;
+  let passedMsg2;
+  let passedEvent;
 
   class HelloWorld extends TestComponent {
-    name = "world";
+    public name = 'world';
 
     constructor() {
       super();
       helloWorldComponent = this;
     }
 
-    userDidClick(msg1, msg2, event) {
+    public userDidClick(msg1, msg2, event) {
       passedMsg1 = msg1;
       passedMsg2 = msg2;
       passedEvent = event;
@@ -45,7 +47,7 @@ test('can curry arguments to actions', function(assert) {
   assert.strictEqual(passedEvent, fakeEvent);
   passedEvent = null;
 
-  helloWorldComponent.name = "cruel world";
+  helloWorldComponent.name = 'cruel world';
   app.scheduleRerender();
 
   h1 = app.rootElement.querySelector('h1');
@@ -66,14 +68,14 @@ test('actions can be passed and invoked with additional arguments', function(ass
   let passed = [];
 
   class ParentComponent extends TestComponent {
-    name = "world";
+    public name = 'world';
 
     constructor() {
       super();
       parentComponent = this;
     }
 
-    userDidClick() {
+    public userDidClick() {
       passed = [...arguments];
       assert.strictEqual(this, parentComponent, 'function context is preserved');
     }
@@ -95,7 +97,7 @@ test('actions can be passed and invoked with additional arguments', function(ass
 
 test('action helper invoked without a function raises an error', function(assert) {
   class ParentComponent extends TestComponent {
-    debugName = 'ParentComponent';
+    public debugName = 'ParentComponent';
   }
 
   let app = buildApp()
@@ -111,7 +113,7 @@ test('action helper invoked without a function raises an error', function(assert
 test('debug name from references can be extracted', function(assert) {
   let refOne = {
     parent: {
-      value() { return { debugName: 'parent' } }
+      value() { return { debugName: 'parent' }; }
     },
     property: 'name'
   };
