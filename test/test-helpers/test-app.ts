@@ -45,6 +45,7 @@ let moduleConfiguration = {
 };
 
 export class AppBuilder {
+  app: TestApplication;
   rootName: string;
   modules: any = {}
 
@@ -72,7 +73,7 @@ export class AppBuilder {
     return this;
   }
 
-  boot() {
+  setUp() {
     let resolverConfiguration = {
       app: { name: 'test-app', rootName: 'test-app' },
       types: moduleConfiguration.types,
@@ -90,9 +91,15 @@ export class AppBuilder {
 
     app.rootElement = rootElement;
     app.renderComponent('main', rootElement, null);
+    this.app = app;
 
-    app.boot();
+    return this;
+  }
 
-    return app;
+  boot() {
+    this.setUp();
+    this.app.boot();
+
+    return this.app;
   }
 }
