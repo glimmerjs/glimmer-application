@@ -56,6 +56,10 @@ export default class Application implements Owner {
   private _rendered = false;
   private _scheduled = false;
   private _rerender: () => void = NOOP;
+  private _beforeRenderCallback: () => void = NOOP;
+  private _afterRenderCallback: () => void = NOOP;
+  private _beforeRerenderCallback: () => void = NOOP;
+  private _afterRerenderCallback: () => void = NOOP;
 
   constructor(options: ApplicationOptions) {
     this.rootName = options.rootName;
@@ -121,6 +125,8 @@ export default class Application implements Owner {
 
   /** @hidden */
   render(): void {
+    this._willRender();
+
     this.env.begin();
 
     let mainLayout = templateFactory(mainTemplate).create(this.env);
@@ -141,15 +147,10 @@ export default class Application implements Owner {
       this.env.begin();
       renderResult.rerender();
       this.env.commit();
-      this._didRender();
     };
 
-    this._didRender();
-  }
-
-  _didRender(): void {
     this._rendered = true;
-
+    this._didRender();
   }
 
   renderComponent(component: string | ComponentDefinition<Component>, parent: Simple.Node, nextSibling: Option<Simple.Node> = null): void {
@@ -161,10 +162,28 @@ export default class Application implements Owner {
     if (this._scheduled || !this._rendered) return;
 
     this._scheduled = true;
+    this._willRerender();
     requestAnimationFrame(() => {
       this._scheduled = false;
       this._rerender();
+      this._didRerender();
     });
+  }
+
+  beforeRender(callback: () => void): void {
+    this._beforeRenderCallback = callback;
+  }
+
+  afterRender(callback: () => void): void {
+    this._afterRenderCallback = callback;
+  }
+
+  beforeRerender(callback: () => void): void {
+    this._beforeRerenderCallback = callback;
+  }
+
+  afterRerender(callback: () => void): void {
+    this._afterRerenderCallback = callback;
   }
 
   /**
@@ -184,5 +203,21 @@ export default class Application implements Owner {
   /** @hidden */
   lookup(specifier: string, referrer?: string): any {
     return this._container.lookup(this.identify(specifier, referrer));
+  }
+
+  private _willRender(): void {
+    this._beforeRenderCallback();
+  }
+
+  private _didRender(): void {
+    this._afterRenderCallback();
+  }
+
+  private _willRerender(): void {
+    this._beforeRerenderCallback();
+  }
+
+  private _didRerender(): void {
+    this._afterRerenderCallback();
   }
 }
