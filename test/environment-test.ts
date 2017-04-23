@@ -48,10 +48,12 @@ test('can render a component', function(assert) {
     .template('main', '<div><hello-world @name={{salutation}} /></div>')
     .boot();
 
-  assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
+  assert.equal(app.app.rootElement.innerText, 'Hello Glimmer!');
 });
 
 test('can render a component with the component helper', function(assert) {
+  let done = assert.async();
+
   class MainComponent extends TestComponent {
     salutation = 'Glimmer';
   }
@@ -62,11 +64,13 @@ test('can render a component with the component helper', function(assert) {
     .component('main', MainComponent)
     .boot();
 
-  assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
+  assert.equal(app.app.rootElement.innerText, 'Hello Glimmer!');
 
-  app.scheduleRerender();
-
-  assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
+  app.scheduleRerender()
+    .andThen(() => {
+      assert.equal(app.app.rootElement.innerText, 'Hello Glimmer!');
+      done();
+    });
 });
 
 test('components without a template raise an error', function(assert) {
@@ -84,6 +88,7 @@ test('components without a template raise an error', function(assert) {
 });
 
 test('can render a custom helper', function(assert) {
+  let done = assert.async();
   class MainComponent extends TestComponent {
   }
 
@@ -93,14 +98,18 @@ test('can render a custom helper', function(assert) {
     .component('main', MainComponent)
     .boot();
 
-  assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
+  assert.equal(app.app.rootElement.innerText, 'Hello Glimmer!');
 
-  app.scheduleRerender();
-
-  assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
+  app.scheduleRerender()
+    .andThen(() => {
+      assert.equal(app.app.rootElement.innerText, 'Hello Glimmer!');
+      done();
+    });
 });
 
 test('can render a custom helper that takes args', function(assert) {
+  let done = assert.async();
+
   class MainComponent extends TestComponent {
     firstName = 'Tom'
     lastName = 'Dale'
@@ -112,10 +121,12 @@ test('can render a custom helper that takes args', function(assert) {
     .component('main', MainComponent)
     .boot();
 
-  assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
+  assert.equal(app.app.rootElement.innerText, 'Hello Tom Dale!');
 
-  app.scheduleRerender();
-
-  assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
+  app.scheduleRerender()
+    .andThen(() => {
+      assert.equal(app.app.rootElement.innerText, 'Hello Tom Dale!');
+      done();
+    });
 });
 

@@ -7,6 +7,8 @@ const { module, test } = QUnit;
 module('Actions');
 
 test('can curry arguments to actions', function(assert) {
+  let done = assert.async();
+
   assert.expect(9);
 
   let fakeEvent: any = {};
@@ -35,9 +37,9 @@ test('can curry arguments to actions', function(assert) {
     .component('hello-world', HelloWorld)
     .boot();
 
-  assert.strictEqual(app.rootElement.innerText, 'Hello World');
+  assert.strictEqual(app.app.rootElement.innerText, 'Hello World');
 
-  let h1 = app.rootElement.querySelector('h1');
+  let h1 = app.app.rootElement.querySelector('h1');
   h1.onclick(fakeEvent);
 
   assert.strictEqual(passedMsg1, 'hello');
@@ -46,14 +48,16 @@ test('can curry arguments to actions', function(assert) {
   passedEvent = null;
 
   helloWorldComponent.name = "cruel world";
-  app.scheduleRerender();
+  app.scheduleRerender()
+    .andThen(() => {
+      h1 = app.app.rootElement.querySelector('h1');
+      h1.onclick(fakeEvent);
 
-  h1 = app.rootElement.querySelector('h1');
-  h1.onclick(fakeEvent);
-
-  assert.strictEqual(passedMsg1, 'hello');
-  assert.strictEqual(passedMsg2, 'cruel world');
-  assert.strictEqual(passedEvent, fakeEvent);
+      assert.strictEqual(passedMsg1, 'hello');
+      assert.strictEqual(passedMsg2, 'cruel world');
+      assert.strictEqual(passedEvent, fakeEvent);
+      done();
+    });
 });
 
 test('actions can be passed and invoked with additional arguments', function(assert) {
@@ -87,7 +91,7 @@ test('actions can be passed and invoked with additional arguments', function(ass
     .component('parent-component', ParentComponent)
     .boot();
 
-  let h1 = app.rootElement.querySelector('.grandchild') as HTMLElement;
+  let h1 = app.app.rootElement.querySelector('.grandchild') as HTMLElement;
   h1.onclick(fakeEvent);
 
   assert.deepEqual(passed, [1, 2, 3, 4, 5, 6, fakeEvent]);

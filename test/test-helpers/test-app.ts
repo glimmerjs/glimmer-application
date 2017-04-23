@@ -99,7 +99,20 @@ export class AppBuilder {
   boot() {
     this.setUp();
     this.app.boot();
-
-    return this.app;
+    return this;
   }
+
+  renderComponent(component: string, parent: Node, nextSibling?: Node) {
+    this.app.renderComponent(component, parent, nextSibling);
+    return this;
+  }
+
+  scheduleRerender() {
+    this.app.scheduleRerender();
+    return this;
+  }
+
+  andThen(callback: () => void) {
+    this.app.afterRerender = callback;
+  };
 }
