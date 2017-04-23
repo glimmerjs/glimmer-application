@@ -5,20 +5,23 @@ const { module, test } = QUnit;
 module('renderComponent');
 
 test('renders a component', function(assert) {
+  let done = assert.async();
   assert.expect(1);
 
   let containerElement = document.createElement('div');
 
   let app = buildApp()
     .template('hello-world', `<h1>Hello Glimmer!</h1>`)
-    .boot();
-
-  return app.renderComponent('hello-world', containerElement).then(() => {
-    assert.equal(containerElement.innerHTML, '<h1>Hello Glimmer!</h1>');
-  });
+    .boot()
+    .renderComponent('hello-world', containerElement)
+    .andThen(() => {
+      assert.equal(containerElement.innerHTML, '<h1>Hello Glimmer!</h1>');
+      done();
+    });
 });
 
 test('renders a component without affecting existing content', function(assert) {
+  let done = assert.async();
   assert.expect(2);
 
   let containerElement = document.createElement('div');
@@ -34,12 +37,15 @@ test('renders a component without affecting existing content', function(assert) 
 
   assert.equal(containerElement.innerHTML, '<p>foo</p>bar');
 
-  return app.renderComponent('hello-world', containerElement).then(() => {
-    assert.equal(containerElement.innerHTML, '<p>foo</p>bar<h1>Hello Glimmer!</h1>');
-  });
+  app.renderComponent('hello-world', containerElement)
+    .andThen(() => {
+      assert.equal(containerElement.innerHTML, '<p>foo</p>bar<h1>Hello Glimmer!</h1>');
+      done();
+    });
 });
 
 test('renders a component before a given sibling', function(assert) {
+  let done = assert.async();
   assert.expect(2);
 
   let containerElement = document.createElement('div');
@@ -55,12 +61,15 @@ test('renders a component before a given sibling', function(assert) {
 
   assert.equal(containerElement.innerHTML, '<p></p><aside></aside>');
 
-  return app.renderComponent('hello-world', containerElement, nextSibling).then(() => {
-    assert.equal(containerElement.innerHTML, '<p></p><h1>Hello Glimmer!</h1><aside></aside>');
-  });
+  app.renderComponent('hello-world', containerElement, nextSibling)
+    .andThen(() => {
+      assert.equal(containerElement.innerHTML, '<p></p><h1>Hello Glimmer!</h1><aside></aside>');
+      done();
+    });
 });
 
 test('renders multiple components in different places', function(assert) {
+  let done = assert.async();
   assert.expect(2);
 
   let firstContainerElement = document.createElement('div');
@@ -71,16 +80,18 @@ test('renders multiple components in different places', function(assert) {
     .template('hello-robbie', `<h1>Hello Robbie!</h1>`)
     .boot();
 
-  return Promise.all([
-    app.renderComponent('hello-world', firstContainerElement),
-    app.renderComponent('hello-robbie', secondContainerElement)
-  ]).then(() => {
+  app.renderComponent('hello-world', firstContainerElement);
+  app.renderComponent('hello-robbie', secondContainerElement);
+
+  app.andThen(() => {
     assert.equal(firstContainerElement.innerHTML, '<h1>Hello Glimmer!</h1>');
     assert.equal(secondContainerElement.innerHTML, '<h1>Hello Robbie!</h1>');
+    done();
   });
 });
 
 test('renders multiple components in the same container', function(assert) {
+  let done = assert.async();
   assert.expect(1);
 
   let containerElement = document.createElement('div');
@@ -90,15 +101,17 @@ test('renders multiple components in the same container', function(assert) {
     .template('hello-robbie', `<h1>Hello Robbie!</h1>`)
     .boot();
 
-  return Promise.all([
-    app.renderComponent('hello-world', containerElement),
-    app.renderComponent('hello-robbie', containerElement)
-  ]).then(() => {
+  app.renderComponent('hello-world', containerElement);
+  app.renderComponent('hello-robbie', containerElement);
+
+  app.andThen(() => {
     assert.equal(containerElement.innerHTML, '<h1>Hello Glimmer!</h1><h1>Hello Robbie!</h1>');
+    done();
   });
 });
 
 test('renders multiple components in the same container in particular places', function(assert) {
+  let done = assert.async();
   assert.expect(2);
 
   let containerElement = document.createElement('div');
@@ -113,10 +126,11 @@ test('renders multiple components in the same container in particular places', f
 
   assert.equal(containerElement.innerHTML, '<aside></aside>');
 
-  return Promise.all([
-    app.renderComponent('hello-world', containerElement),
-    app.renderComponent('hello-robbie', containerElement, nextSibling)
-  ]).then(() => {
+  app.renderComponent('hello-world', containerElement);
+  app.renderComponent('hello-robbie', containerElement, nextSibling);
+
+  app.andThen(() => {
     assert.equal(containerElement.innerHTML, '<h1>Hello Robbie!</h1><aside></aside><h1>Hello Glimmer!</h1>');
+    done();
   });
 });
