@@ -57,6 +57,7 @@ export default class Application implements Owner {
   private _initialized = false;
   private _rendered = false;
   private _scheduled = false;
+  private _working = false;
   private _rerender: () => void = NOOP;
 
   constructor(options: ApplicationOptions) {
@@ -152,7 +153,6 @@ export default class Application implements Owner {
 
   _didRender(): void {
     this._rendered = true;
-
   }
 
   renderComponent(component: string | ComponentDefinition<Component>, parent: Simple.Node, nextSibling: Option<Simple.Node> = null): void {
@@ -161,12 +161,18 @@ export default class Application implements Owner {
   }
 
   scheduleRerender(): void {
-    if (this._scheduled || !this._rendered) return;
+    this._working = true;
+    
+    if (this._scheduled || !this._rendered) {
+      this._working = false;
+      return;
+    }
 
     this._scheduled = true;
     requestAnimationFrame(() => {
       this._scheduled = false;
       this._rerender();
+      this._working = false;
     });
   }
 
