@@ -1,11 +1,13 @@
 import { getOwner, setOwner, Owner } from '@glimmer/di';
 import { DOMTreeConstruction } from '@glimmer/runtime';
-
 import Environment, { EnvironmentOptions } from '../src/environment';
 import { TestComponent } from './test-helpers/components';
 import buildApp from './test-helpers/test-app';
+import didRender from './test-helpers/did-render';
+import SimpleDOM from 'simple-dom';
 
 const { module, test } = QUnit;
+const serializer = new SimpleDOM.HTMLSerializer(SimpleDOM.voidMap);
 
 module('Environment');
 
@@ -51,7 +53,7 @@ test('can render a component', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 });
 
-test('can render a component with the component helper', function(assert) {
+test('can render a component with the component helper', async function(assert) {
   class MainComponent extends TestComponent {
     salutation = 'Glimmer';
   }
@@ -65,6 +67,8 @@ test('can render a component with the component helper', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 
   app.scheduleRerender();
+
+  await didRender(app);
 
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 });
@@ -83,7 +87,7 @@ test('components without a template raise an error', function(assert) {
   }, /The component 'hello-world' is missing a template. All components must have a template. Make sure there is a template.hbs in the component directory./);
 });
 
-test('can render a custom helper', function(assert) {
+test('can render a custom helper', async function(assert) {
   class MainComponent extends TestComponent {
   }
 
@@ -96,11 +100,13 @@ test('can render a custom helper', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 
   app.scheduleRerender();
+  
+  await didRender(app);
 
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 });
 
-test('can render a custom helper that takes args', function(assert) {
+test('can render a custom helper that takes args', async function(assert) {
   class MainComponent extends TestComponent {
     firstName = 'Tom'
     lastName = 'Dale'
@@ -115,7 +121,22 @@ test('can render a custom helper that takes args', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
 
   app.scheduleRerender();
+  
+  await didRender(app);
 
   assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
 });
 
+test('renders a component using simple-dom', function(assert) {
+  assert.expect(1);
+
+  let customDocument = new SimpleDOM.Document();
+
+  let app = buildApp('test-app', { document: customDocument })
+    .template('main', `<h1>Hello Glimmer!</h1>`)
+    .boot();
+
+  let serializedHTML = serializer.serialize(app.rootElement);
+
+  assert.equal(serializedHTML, '<div><h1>Hello Glimmer!</h1></div>');
+});

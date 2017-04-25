@@ -57,17 +57,13 @@ export default class Application implements Owner {
   private _initialized = false;
   private _rendered = false;
   private _scheduled = false;
+  private _working = false;
   private _rerender: () => void = NOOP;
-  private _afterRender: () => void = NOOP;
-  private _renderPromise: Option<Promise<void>>;
 
   constructor(options: ApplicationOptions) {
     this.rootName = options.rootName;
     this.resolver = options.resolver;
     this.document = options.document || window.document;
-    this._renderPromise = new Promise<void>(resolve => {
-      this._afterRender = resolve;
-    });
   }
 
   /** @hidden */
@@ -156,45 +152,27 @@ export default class Application implements Owner {
   }
 
   _didRender(): void {
-    let { _afterRender } = this;
-
-    this._afterRender = NOOP;
-    this._renderPromise = null;
     this._rendered = true;
-
-    _afterRender();
   }
 
-  renderComponent(
-    component: string | ComponentDefinition<Component>,
-    parent: Simple.Node,
-    nextSibling: Option<Simple.Node> = null
-  ): Promise<void> {
+  renderComponent(component: string | ComponentDefinition<Component>, parent: Simple.Node, nextSibling: Option<Simple.Node> = null): void {
     this._roots.push({ id: this._rootsIndex++, component, parent, nextSibling });
-    return this.scheduleRerender();
+    this.scheduleRerender();
   }
 
-  scheduleRerender(): Promise<void> {
-    let { _renderPromise } = this;
-
-    if (_renderPromise === null) {
-      _renderPromise = this._renderPromise = new Promise<void>(resolve => {
-        this._afterRender = resolve;
-      });
-
-      this._scheduleRerender();
+  scheduleRerender(): void {
+    this._working = true;
+    
+    if (this._scheduled || !this._rendered) {
+      this._working = false;
+      return;
     }
-
-    return _renderPromise;
-  }
-
-  _scheduleRerender(): void {
-    if (this._scheduled || !this._rendered) return;
 
     this._scheduled = true;
     requestAnimationFrame(() => {
       this._scheduled = false;
       this._rerender();
+      this._working = false;
     });
   }
 

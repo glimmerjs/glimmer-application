@@ -1,12 +1,13 @@
 import { TestComponent } from './test-helpers/components';
 import buildApp from './test-helpers/test-app';
+import didRender from './test-helpers/did-render';
 import { debugInfoForReference } from '../src/helpers/action';
 
 const { module, test } = QUnit;
 
 module('Actions');
 
-test('can curry arguments to actions', function(assert) {
+test('can curry arguments to actions', async function(assert) {
   assert.expect(9);
 
   let fakeEvent: any = {};
@@ -47,6 +48,8 @@ test('can curry arguments to actions', function(assert) {
 
   helloWorldComponent.name = "cruel world";
   app.scheduleRerender();
+  
+  await didRender(app);
 
   h1 = app.rootElement.querySelector('h1');
   h1.onclick(fakeEvent);
