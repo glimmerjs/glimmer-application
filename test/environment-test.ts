@@ -3,6 +3,7 @@ import { DOMTreeConstruction } from '@glimmer/runtime';
 import Environment, { EnvironmentOptions } from '../src/environment';
 import { TestComponent } from './test-helpers/components';
 import buildApp from './test-helpers/test-app';
+import didRender from './test-helpers/did-render';
 import SimpleDOM from 'simple-dom';
 
 const { module, test } = QUnit;
@@ -52,7 +53,7 @@ test('can render a component', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 });
 
-test('can render a component with the component helper', function(assert) {
+test('can render a component with the component helper', async function(assert) {
   class MainComponent extends TestComponent {
     salutation = 'Glimmer';
   }
@@ -66,6 +67,8 @@ test('can render a component with the component helper', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 
   app.scheduleRerender();
+
+  await didRender(app);
 
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 });
@@ -84,7 +87,7 @@ test('components without a template raise an error', function(assert) {
   }, /The component 'hello-world' is missing a template. All components must have a template. Make sure there is a template.hbs in the component directory./);
 });
 
-test('can render a custom helper', function(assert) {
+test('can render a custom helper', async function(assert) {
   class MainComponent extends TestComponent {
   }
 
@@ -97,11 +100,13 @@ test('can render a custom helper', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 
   app.scheduleRerender();
+  
+  await didRender(app);
 
   assert.equal(app.rootElement.innerText, 'Hello Glimmer!');
 });
 
-test('can render a custom helper that takes args', function(assert) {
+test('can render a custom helper that takes args', async function(assert) {
   class MainComponent extends TestComponent {
     firstName = 'Tom'
     lastName = 'Dale'
@@ -116,6 +121,8 @@ test('can render a custom helper that takes args', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
 
   app.scheduleRerender();
+  
+  await didRender(app);
 
   assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
 });
