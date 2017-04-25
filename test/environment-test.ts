@@ -1,11 +1,12 @@
 import { getOwner, setOwner, Owner } from '@glimmer/di';
 import { DOMTreeConstruction } from '@glimmer/runtime';
-
 import Environment, { EnvironmentOptions } from '../src/environment';
 import { TestComponent } from './test-helpers/components';
 import buildApp from './test-helpers/test-app';
+import SimpleDOM from 'simple-dom';
 
 const { module, test } = QUnit;
+const serializer = new SimpleDOM.HTMLSerializer(SimpleDOM.voidMap);
 
 module('Environment');
 
@@ -119,3 +120,16 @@ test('can render a custom helper that takes args', function(assert) {
   assert.equal(app.rootElement.innerText, 'Hello Tom Dale!');
 });
 
+test('renders a component using simple-dom', function(assert) {
+  assert.expect(1);
+
+  let customDocument = new SimpleDOM.Document();
+
+  let app = buildApp('test-app', { document: customDocument })
+    .template('main', `<h1>Hello Glimmer!</h1>`)
+    .boot();
+
+  let serializedHTML = serializer.serialize(app.rootElement);
+
+  assert.equal(serializedHTML, '<div><h1>Hello Glimmer!</h1></div>');
+});

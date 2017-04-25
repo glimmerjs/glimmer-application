@@ -1,8 +1,6 @@
 import buildApp from './test-helpers/test-app';
-import SimpleDOM from 'simple-dom';
 
 const { module, test } = QUnit;
-const serializer = new SimpleDOM.HTMLSerializer(SimpleDOM.voidMap);
 
 module('renderComponent');
 
@@ -123,19 +121,5 @@ test('renders multiple components in the same container in particular places', f
   });
 });
 
-test('renders a component using simple-dom', function(assert) {
-  assert.expect(1);
 
-  let customDocument = new SimpleDOM.Document();
-
-  let containerElement = customDocument.createElement('div');
-
-  let app = buildApp('test-app', { document: customDocument })
-    .template('hello-world', `<h1>Hello Glimmer!</h1>`)
-    .boot();
-
-  return app.renderComponent('hello-world', containerElement).then(() => {
-    let serializedHTML = serializer.serialize(containerElement);
-    assert.equal(serializedHTML, '<div><h1>Hello Glimmer!</h1></div>');
-  });
 });
