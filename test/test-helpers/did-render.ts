@@ -1,6 +1,6 @@
 import Application from '../../src/application';
 
-export default async function didRender(app: Application): Promise<void> {
+async function didRender(app: Application): Promise<void> {
   return new Promise<void>(resolve => {
     let watcher = setInterval(function() {
       if (app['_scheduled']) return;
@@ -8,4 +8,6 @@ export default async function didRender(app: Application): Promise<void> {
       resolve();
     }, 10);
   });
-}
+};
+
+export default didRender;
