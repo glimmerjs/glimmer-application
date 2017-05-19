@@ -19,7 +19,9 @@
     "preversion": "npm test",
     "prepublish": "npm run build",
     "postpublish": "git push origin master --tags",
-    "test": "ember test",
+    "test": "npm run tslint && ember test",
+    "tslint": "tslint --typecheck -c tslint.json --project tsconfig.json",
+    "tslint:format": "tslint --typecheck -c tslint.json --project tsconfig.json --fix",
     "problems": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -41,6 +43,7 @@
     "ember-cli": "^2.12.0",
     "simple-dom": "^0.3.2",
     "testem": "^1.13.0",
+    "tslint": "^5.2.0",
     "typescript": "^2.2.1"
   }
 }
