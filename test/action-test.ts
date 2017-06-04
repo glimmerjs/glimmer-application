@@ -100,6 +100,30 @@ test('actions can be passed and invoked with additional arguments', function(ass
   assert.deepEqual(passed, [1, 2, 3, 4, 5, 6, fakeEvent]);
 });
 
+test('action helper invoked on a tag with no arguments works', function(assert) {
+  assert.expect(2);
+  let fakeEvent: any = {
+    type: 'click'
+  };
+  let parentComponent: ParentComponent;
+  let passed = false;
+  class ParentComponent extends TestComponent {
+    debugName = 'ParentComponent';
+    doesExist() {
+      passed = true;
+      assert.strictEqual(this, parentComponent, 'function context is preserved');
+    }
+  }
+
+  let app = buildApp()
+    .template('main', '<div><parent-component /></div>')
+    .template('parent-component', '<div><a id="the-link" href="#" onclick={{action doesExist}}>do it</a></div>')
+    .component('parent-component', ParentComponent).boot();
+
+  let aTag = app.rootElement.querySelector('#the-link') as HTMLElement;
+  aTag.onclick(fakeEvent);
+});
+
 test('action helper invoked without a function raises an error', function(assert) {
   class ParentComponent extends Component {
     debugName = 'ParentComponent';
