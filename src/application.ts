@@ -14,8 +14,8 @@ import {
   UpdatableReference
 } from '@glimmer/object-reference';
 import {
-  Option,
-  Dict
+  Dict,
+  Maybe
 } from '@glimmer/util';
 import {
   Simple
@@ -47,8 +47,8 @@ export class AppRoot {
     private index: number,
     public component: string,
     public parent: Simple.Node,
-    public nextSibling: Option<Simple.Node>,
-    public args: Args
+    public nextSibling: Maybe<Simple.Node>,
+    public args: Maybe<Args>
   ) {}
 
   get id(): string {
@@ -57,7 +57,7 @@ export class AppRoot {
 }
 
 export interface RenderComponentOptions {
-  nextSibling?: Option<Simple.Node>;
+  nextSibling?: Simple.Node;
   args?: Args;
 }
 
