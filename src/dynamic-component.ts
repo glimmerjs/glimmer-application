@@ -43,7 +43,7 @@ function dynamicComponentFor(vm: VM, args: Arguments, meta: TemplateMeta): Dynam
   return new DynamicComponentReference(nameRef, env, meta);
 }
 
-class DynamicComponentReference implements PathReference<ComponentDefinition<Opaque>> {
+export class DynamicComponentReference implements PathReference<ComponentDefinition<Opaque>> {
   public tag: TagWrapper<RevisionTag>;
 
   constructor(private nameRef: PathReference<Opaque>, private env: GlimmerEnvironment, private meta: TemplateMeta) {

@@ -34,6 +34,7 @@ import {
   inlineComponentMacro
  } from './dynamic-component';
  import action from './helpers/action';
+ import component from './helpers/component';
  import buildUserHelper from './helpers/user-helper';
 
 type KeyFor<T> = (item: Opaque, index: T) => string;
@@ -51,7 +52,8 @@ class DefaultComponentDefinition extends ComponentDefinition<any> {
 
 const DEFAULT_MANAGER = 'main';
 const DEFAULT_HELPERS = {
-  action
+  action,
+  component
 };
 
 export default class Environment extends GlimmerEnvironment {

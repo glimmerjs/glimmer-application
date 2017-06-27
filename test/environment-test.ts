@@ -77,6 +77,35 @@ test('can render a component with the component helper', async function(assert) 
   assert.equal(root.innerText, 'Hello Glimmer!');
 });
 
+test('can render a component with the nested component helper', async function(assert) {
+  class MainComponent extends Component {
+    salutation = 'Glimmer';
+  }
+
+  // let app = buildApp()
+  //   .template('parent-component', `<h1>{{yield (component 'contextual-component' name=@name)}}</h1>`)
+  //   .template('contextual-component', '<p>Hi, {{@name}}!</p>')
+  //   .template('main', '<div><parent-component @name=salutation as |comp|>{{component comp}}</parent-component></div>')
+  //   .component('main', MainComponent)
+  //   .boot();
+  let app = buildApp()
+    .template('parent-component', `<h1>{{yield @name (component 'contextual-component')}}</h1>`)
+    .template('contextual-component', '<p>Hi, {{@name}}!</p>')
+    .template('main', `<div><parent-component @name={{salutation}} as |name comp|>{{component comp name=salutation}}</parent-component></div>`)
+    .component('main', MainComponent)
+    .boot();
+
+  let root = app.rootElement as HTMLElement;
+
+  assert.equal(root.innerText, 'Hi, Glimmer!');
+
+  app.scheduleRerender();
+
+  await didRender(app);
+
+  assert.equal(root.innerText, 'Hi, Glimmer!');
+});
+
 test('components without a template raise an error', function(assert) {
   class HelloWorldComponent extends Component {
     debugName: 'hello-world';
