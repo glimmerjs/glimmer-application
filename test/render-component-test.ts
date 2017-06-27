@@ -129,7 +129,7 @@ test('renders multiple components in the same container in particular places', a
 });
 
 test('accepts args', async function(assert) {
-  assert.expect(1);
+  assert.expect(2);
 
   let containerElement = document.createElement('div');
 
@@ -139,9 +139,15 @@ test('accepts args', async function(assert) {
 
   let args = { name: 'Glimmer' };
 
-  app.renderComponent('hello-world', containerElement, { args });
+  let result = app.renderComponent('hello-world', containerElement, { args });
 
   await didRender(app);
 
   assert.equal(containerElement.innerHTML, '<hello-world>Hello Glimmer!</hello-world>');
+
+  result.updateArgs({ name: 'Robbie' });
+
+  await didRender(app);
+
+  assert.equal(containerElement.innerHTML, '<hello-world>Hello Robbie!</hello-world>');
 });

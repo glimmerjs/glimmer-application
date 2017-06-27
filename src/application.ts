@@ -8,9 +8,7 @@ import {
   setOwner,
 } from '@glimmer/di';
 import {
-  templateFactory,
-  ComponentDefinition,
-  Component
+  templateFactory
 } from '@glimmer/runtime';
 import {
   UpdatableReference
@@ -40,17 +38,45 @@ export interface Initializer {
   initialize(registry: RegistryWriter): void;
 }
 
-export interface AppRoot {
-  id: number;
-  component: string | ComponentDefinition<Component>;
-  parent: Simple.Node;
-  nextSibling: Option<Simple.Node>;
-  args?: Dict<any>;
+export type Args = Dict<any>;
+
+export class AppRoot {
+  public revision = 0;
+
+  constructor(
+    private index: number,
+    public component: string,
+    public parent: Simple.Node,
+    public nextSibling: Option<Simple.Node>,
+    public args: Args
+  ) {}
+
+  get id(): string {
+    return `${this.index}.${this.revision}`;
+  }
 }
 
 export interface RenderComponentOptions {
   nextSibling?: Option<Simple.Node>;
-  args?: Dict<any>;
+  args?: Args;
+}
+
+export class RenderComponentResult {
+  private root: AppRoot;
+
+  constructor(private app: Application, private rootIndex: number) {
+    this.root = this.app['_roots'][this.rootIndex];
+  }
+
+  updateArgs(newArgs: Args): void {
+    this.root.args = newArgs;
+    this.update();
+    this.app.scheduleRerender();
+  }
+
+  private update() {
+    this.root.revision++;
+  }
 }
 
 export default class Application implements Owner {
@@ -59,7 +85,6 @@ export default class Application implements Owner {
   public document: Simple.Document;
   public env: Environment;
   private _roots: AppRoot[] = [];
-  private _rootsIndex = 0;
   private _registry: Registry;
   private _container: Container;
   private _initializers: Initializer[] = [];
@@ -165,11 +190,15 @@ export default class Application implements Owner {
     this._rendered = true;
   }
 
-  renderComponent(component: string, parent: Simple.Node, options: RenderComponentOptions = {}): void {
+  renderComponent(component: string, parent: Simple.Node, options: RenderComponentOptions = {}): RenderComponentResult {
     let { nextSibling, args } = options;
+    let index = this._roots.length;
+    let root = new AppRoot(index, component, parent, nextSibling, args);
 
-    this._roots.push({ id: this._rootsIndex++, component, parent, nextSibling, args });
+    this._roots.push(root);
     this.scheduleRerender();
+
+    return new RenderComponentResult(this, index);
   }
 
   scheduleRerender(): void {
