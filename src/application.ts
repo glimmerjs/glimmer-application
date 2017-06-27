@@ -16,7 +16,8 @@ import {
   UpdatableReference
 } from '@glimmer/object-reference';
 import {
-  Option
+  Option,
+  Dict
 } from '@glimmer/util';
 import {
   Simple
@@ -44,6 +45,12 @@ export interface AppRoot {
   component: string | ComponentDefinition<Component>;
   parent: Simple.Node;
   nextSibling: Option<Simple.Node>;
+  args?: Dict<any>;
+}
+
+export interface RenderComponentOptions {
+  nextSibling?: Option<Simple.Node>;
+  args?: Dict<any>;
 }
 
 export default class Application implements Owner {
@@ -158,8 +165,10 @@ export default class Application implements Owner {
     this._rendered = true;
   }
 
-  renderComponent(component: string | ComponentDefinition<Component>, parent: Simple.Node, nextSibling: Option<Simple.Node> = null): void {
-    this._roots.push({ id: this._rootsIndex++, component, parent, nextSibling });
+  renderComponent(component: string, parent: Simple.Node, options: RenderComponentOptions = {}): void {
+    let { nextSibling, args } = options;
+
+    this._roots.push({ id: this._rootsIndex++, component, parent, nextSibling, args });
     this.scheduleRerender();
   }
 
