@@ -14,7 +14,6 @@ import {
   UpdatableReference
 } from '@glimmer/object-reference';
 import {
-  Dict,
   Maybe
 } from '@glimmer/util';
 import {
@@ -24,6 +23,7 @@ import ApplicationRegistry from './application-registry';
 import DynamicScope from './dynamic-scope';
 import Environment from './environment';
 import mainTemplate from './templates/main';
+import { Args } from './args';
 
 function NOOP() {}
 
@@ -37,8 +37,6 @@ export interface Initializer {
   name?: string;
   initialize(registry: RegistryWriter): void;
 }
-
-export type Args = Dict<any>;
 
 export class AppRoot {
   public revision = 0;
@@ -68,14 +66,9 @@ export class RenderComponentResult {
     this.root = this.app['_roots'][this.rootIndex];
   }
 
-  updateArgs(newArgs: Args): void {
-    this.root.args = newArgs;
-    this.update();
-    this.app.scheduleRerender();
-  }
-
-  private update() {
+  update() {
     this.root.revision++;
+    this.app.scheduleRerender();
   }
 }
 

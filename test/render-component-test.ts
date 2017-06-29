@@ -1,5 +1,7 @@
 import buildApp from './test-helpers/test-app';
 import { didRender } from '@glimmer/application-test-helpers';
+import { EMPTY_ARRAY } from '@glimmer/util';
+import { prepareNamedArgs } from '../src/args';
 
 const { module, test } = QUnit;
 
@@ -137,15 +139,20 @@ test('accepts args', async function(assert) {
     .template('hello-world', `<hello-world>Hello {{@name}}!</hello-world>`)
     .boot();
 
-  let args = { name: 'Glimmer' };
-
+  let positional = EMPTY_ARRAY;
+  let named = prepareNamedArgs({ name: 'Glimmer' });
+  let args = {
+    positional,
+    named
+  };
   let result = app.renderComponent('hello-world', containerElement, { args });
 
   await didRender(app);
 
   assert.equal(containerElement.innerHTML, '<hello-world>Hello Glimmer!</hello-world>');
 
-  result.updateArgs({ name: 'Robbie' });
+  named.name.set('Robbie');
+  result.update();
 
   await didRender(app);
 
