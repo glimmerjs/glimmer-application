@@ -8,15 +8,13 @@ import {
   setOwner,
 } from '@glimmer/di';
 import {
-  templateFactory,
-  ComponentDefinition,
-  Component
+  templateFactory
 } from '@glimmer/runtime';
 import {
   UpdatableReference
 } from '@glimmer/object-reference';
 import {
-  Option
+  Maybe
 } from '@glimmer/util';
 import {
   Simple
@@ -25,6 +23,7 @@ import ApplicationRegistry from './application-registry';
 import DynamicScope from './dynamic-scope';
 import Environment from './environment';
 import mainTemplate from './templates/main';
+import { Args } from './args';
 
 function NOOP() {}
 
@@ -39,11 +38,38 @@ export interface Initializer {
   initialize(registry: RegistryWriter): void;
 }
 
-export interface AppRoot {
-  id: number;
-  component: string | ComponentDefinition<Component>;
-  parent: Simple.Node;
-  nextSibling: Option<Simple.Node>;
+export class AppRoot {
+  public revision = 0;
+
+  constructor(
+    private index: number,
+    public component: string,
+    public parent: Simple.Node,
+    public nextSibling: Maybe<Simple.Node>,
+    public args: Maybe<Args>
+  ) {}
+
+  get id(): string {
+    return `${this.index}.${this.revision}`;
+  }
+}
+
+export interface RenderComponentOptions {
+  nextSibling?: Simple.Node;
+  args?: Args;
+}
+
+export class RenderComponentResult {
+  private root: AppRoot;
+
+  constructor(private app: Application, private rootIndex: number) {
+    this.root = this.app['_roots'][this.rootIndex];
+  }
+
+  update() {
+    this.root.revision++;
+    this.app.scheduleRerender();
+  }
 }
 
 export default class Application implements Owner {
@@ -52,7 +78,6 @@ export default class Application implements Owner {
   public document: Simple.Document;
   public env: Environment;
   private _roots: AppRoot[] = [];
-  private _rootsIndex = 0;
   private _registry: Registry;
   private _container: Container;
   private _initializers: Initializer[] = [];
@@ -158,9 +183,15 @@ export default class Application implements Owner {
     this._rendered = true;
   }
 
-  renderComponent(component: string | ComponentDefinition<Component>, parent: Simple.Node, nextSibling: Option<Simple.Node> = null): void {
-    this._roots.push({ id: this._rootsIndex++, component, parent, nextSibling });
+  renderComponent(component: string, parent: Simple.Node, options: RenderComponentOptions = {}): RenderComponentResult {
+    let { nextSibling, args } = options;
+    let index = this._roots.length;
+    let root = new AppRoot(index, component, parent, nextSibling, args);
+
+    this._roots.push(root);
     this.scheduleRerender();
+
+    return new RenderComponentResult(this, index);
   }
 
   scheduleRerender(): void {
