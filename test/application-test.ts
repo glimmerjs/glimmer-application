@@ -1,6 +1,8 @@
 import Application from '../src/application';
+import buildApp from './test-helpers/test-app';
 import { BlankResolver } from './test-helpers/resolvers';
 import { Document } from 'simple-dom';
+import { ComponentManager } from '@glimmer/component';
 
 const { module, test } = QUnit;
 
@@ -20,4 +22,27 @@ test('accepts options for rootName, resolver and document', function(assert) {
   let customDocument = new Document();
   app = new Application({ rootName: 'app', resolver, document: customDocument });
   assert.equal(app.document, customDocument);
+});
+
+test('makes parent element available to the component manager', function(assert) {
+  assert.expect(1);
+
+  let parentElement;
+
+  class FancyComponentManager extends ComponentManager {
+    static create(options) {
+      return new this(options);
+    }
+    create(env, def, args, dynamicScope) {
+      parentElement = dynamicScope.get('_parentElement').value();
+
+      return super.create(env, def, args);
+    }
+  }
+
+  let app = buildApp('test-app', { ComponentManager: FancyComponentManager })
+    .template('main', '<foo-bar>baz</foo-bar>')
+    .boot();
+
+  assert.equal(parentElement.outerHTML, '<div><foo-bar>baz</foo-bar></div>');
 });
