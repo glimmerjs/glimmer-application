@@ -1,5 +1,7 @@
 {{#each roots key="id" as |root|~}}
   {{~#-in-element root.parent nextSibling=root.nextSibling~}}
-    {{~component root.component~}}
+    {{~#-with-dynamic-vars _parentElement=root.parent~}}
+      {{~component root.component~}}
+    {{~/-with-dynamic-vars~}}
   {{~/-in-element~}}
 {{~/each~}}
