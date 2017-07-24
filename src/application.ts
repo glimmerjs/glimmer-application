@@ -132,7 +132,7 @@ export default class Application implements Owner {
     let mainLayout = templateFactory(mainTemplate).create(this.env);
     let self = new UpdatableReference({ roots: this._roots });
     let doc = this.document as Document; // TODO FixReification
-    let parentNode = doc.body;
+    let parentNode = doc.head;
     let dynamicScope = new DynamicScope();
     let templateIterator = mainLayout.render({ self, parentNode, dynamicScope });
     let result;
